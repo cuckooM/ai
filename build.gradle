@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.cuckoom'
 version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
+description = 'Spring AI 多模型对话框架'
 
 ext {
 	set('springAiVersion', '0.8.1')
@@ -37,13 +37,12 @@ dependencyManagement {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
-	// implementation 'org.springframework.ai:spring-ai-azure-openai-spring-boot-starter'
-	// implementation 'org.springframework.ai:spring-ai-anthropic-spring-boot-starter'
-	// implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
+	// 使用 spring-ai-openai 而非 spring-boot-starter，避免自动配置冲突
+	implementation 'org.springframework.ai:spring-ai-openai'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'jakarta.annotation:jakarta.annotation-api'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

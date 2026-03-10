@@ -1,11 +1,38 @@
 spring:
   application:
     name: ai
+
+  # 禁用 Spring AI OpenAI 自动配置，使用自定义配置
+  main:
+    auto-configuration-exclude:
+      - org.springframework.ai.openai.spring.boot.autoconfigure.OpenAiAutoConfiguration
+
   ai:
-    openai:
-      base-url: https://api.deepseek.com
-      api-key: ${DEEPSEEK_API_KEY:}
-      chat:
-        options:
-          model: deepseek-chat
-          temperature: 0.7
+    # 默认使用的模型: deepseek, qwen, qwen3-coder-next
+    default-model: ${AI_DEFAULT_MODEL:deepseek}
+
+    # DeepSeek 配置
+    deepseek:
+      enabled: ${DEEPSEEK_ENABLED:true}
+      base-url: ${DEEPSEEK_BASE_URL}
+      api-key: ${DEEPSEEK_API_KEY}
+      model: ${DEEPSEEK_MODEL:deepseek-chat}
+
+    # Qwen (通义千问) 配置
+    qwen:
+      enabled: ${QWEN_ENABLED:false}
+      base-url: ${QWEN_BASE_URL}
+      api-key: ${QWEN_API_KEY}
+      model: ${QWEN_MODEL:qwen-turbo}
+
+    # Qwen3 Coder Next 配置
+    qwen3-coder-next:
+      enabled: ${QWEN3CODER_ENABLED:false}
+      base-url: ${QWEN_BASE_URL}
+      api-key: ${QWEN_API_KEY}
+      model: ${QWEN3CODER_MODEL:qwen3-coder-next}
+
+# 应用配置
+app:
+  # 默认语言: zh, en, ja, fr, zh_tw
+  language: ${APP_LANGUAGE:zh}

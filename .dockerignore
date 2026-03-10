@@ -1,0 +1,35 @@
+# Gradle cache
+.gradle/
+build/
+gradle-app.setting
+
+# IDE files
+.idea/
+*.iws
+*.iml
+*.ipr
+.settings/
+.workspace/
+.vscode/
+
+# Log files
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Git
+.git/
+.gitignore
+
+# README and docs (optional, uncomment if needed)
+# README.md
+
+# Test files (optional, uncomment if needed)
+# src/test/

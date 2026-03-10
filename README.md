@@ -1,13 +1,15 @@
-# Spring AI DeepSeek 对接框架
+# Spring AI 多模型对接框架
 
-基于 Spring AI 的 DeepSeek 模型对接框架。
+基于 Spring AI 的多模型对接框架，支持 DeepSeek、通义千问（Qwen）和 Qwen3 Coder Next 模型。
 
 ## 功能特性
 
 - ✅ 支持 DeepSeek 模型
+- ✅ 支持通义千问 qwen-turbo 模型
+- ✅ 支持通义千问 qwen3-coder-next 模型
 - ✅ 统一的 REST API 接口
 - ✅ 命令行交互演示
-- ✅ 可扩展的架构设计（未来可添加更多模型）
+- ✅ 支持运行时模型切换
 
 ## 快速开始
 
@@ -24,6 +26,9 @@
 ```bash
 # DeepSeek
 export DEEPSEEK_API_KEY=your_deepseek_key
+
+# 通义千问（可选）
+export QWEN_API_KEY=your_qwen_key
 ```
 
 或者直接修改 `src/main/resources/application.yaml` 文件。
@@ -47,12 +52,21 @@ java -jar build/libs/ai-0.0.1-SNAPSHOT.jar
 
 ```
 === Spring AI 对话演示 ===
-使用 DeepSeek 模型进行对话
+使用的模型: DeepSeek
 输入 'exit' 退出程序
+输入 'list' 查看支持的模型
+输入 'model <name>' 切换模型
 请输入你的消息：
+
 > 你好，介绍一下自己
 AI: 我是阿里云的通义千问，一个大型语言模型...
 ```
+
+**支持的命令：**
+- `/help` - 显示帮助信息
+- `/list` - 显示支持的模型列表
+- `model <name>` - 切换模型（例如: `model qwen`）
+- `exit` - 退出程序
 
 #### REST API 接口
 
@@ -62,23 +76,104 @@ AI: 我是阿里云的通义千问，一个大型语言模型...
 ```json
 {
   "message": "你好，请介绍一下自己",
-  "model": "deepseek"  // 可选：deepseek
+  "model": "deepseek"
 }
 ```
 
 响应示例：
 ```json
 {
-  "reply": "我是阿里云的通义千问..."
+  "reply": "这是一个测试回复示例..."
 }
 ```
 
+通过 `model` 参数指定使用的模型（可选）：
+- `deepseek` - DeepSeek 模型
+- `qwen` - 通义千问 qwen-turbo 模型
+- `qwen3-coder-next` - 通义千问3 代码专家模型
+
+如果未指定 `model` 参数，将使用配置文件中默认的模型。
+
 使用 curl 测试：
 ```bash
+# 使用默认模型
+curl -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "你好"}'
+
+# 使用 DeepSeek 模型
 curl -X POST http://localhost:8080/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "你好", "model": "deepseek"}'
+
+# 使用 Qwen 模型
+curl -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "你好", "model": "qwen"}'
+
+# 使用 Qwen3 Coder Next 模型
+curl -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "你好", "model": "qwen3-coder-next"}'
 ```
+
+## 模型配置
+
+### 默认配置
+
+| 模型 | API端点 | 默认模型名称 | 配置前缀 |
+|------|---------|-------------|----------|
+| DeepSeek | https://api.deepseek.com | deepseek-chat | `spring.ai.deepseek` |
+| Qwen | https://dashscope.aliyuncs.com/compatible-mode/v1 | qwen-turbo | `spring.ai.qwen` |
+| Qwen3 Coder Next | https://dashscope.aliyuncs.com/compatible-mode/v1 | qwen3-coder-next | `spring.ai.qwen3-coder-next` |
+
+### 自定义配置
+
+修改 `src/main/resources/application.yaml`：
+
+```yaml
+spring:
+  ai:
+    # 默认使用的模型
+    default-model: qwen
+
+    # DeepSeek 配置
+    deepseek:
+      enabled: true
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY:your_key}
+      model: deepseek-chat
+
+    # Qwen 配置
+    qwen:
+      enabled: true
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${QWEN_API_KEY:your_key}
+      model: qwen-plus
+
+    # Qwen3 Coder Next 配置
+    qwen3-coder-next:
+      enabled: true
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${QWEN_API_KEY:your_key}
+      model: qwen3-coder-next
+```
+
+### 环境变量支持
+
+| 环境变量 | 说明 |
+|---------|------|
+| `AI_DEFAULT_MODEL` | 默认使用的模型（deepseek, qwen, qwen3-coder-next） |
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥 |
+| `DEEPSEEK_BASE_URL` | DeepSeek API 基础 URL |
+| `DEEPSEEK_MODEL` | DeepSeek 模型名称 |
+| `QWEN_API_KEY` | 通义千问 API 密钥 |
+| `QWEN_BASE_URL` | 通义千问 API 基础 URL |
+| `QWEN_MODEL` | Qwen 模型名称 |
+
+### 注意事项
+
+**⚠️ 安全提示：** 请勿将包含真实 API 密钥的配置文件提交到版本控制系统中。建议使用环境变量或本地配置文件来管理敏感信息。
 
 ## 项目结构
 
@@ -93,102 +188,59 @@ src/main/java/com/cuckoom/ai/
     └── DemoRunner.java             # 命令行演示
 ```
 
-## 模型配置
-
-### 默认配置
-
-| 模型 | API端点 | 默认模型名称 |
-|------|---------|-------------|
-| OpenAI | https://api.openai.com | gpt-3.5-turbo |
-| 千问 | https://dashscope.aliyuncs.com/compatible-mode/v1 | qwen-turbo |
-| DeepSeek | https://api.deepseek.com | deepseek-chat |
-
-### 自定义配置
-
-修改 `application.yaml`：
-
-```yaml
-spring:
-  ai:
-    openai:
-      base-url: https://api.openai.com
-      api-key: ${OPENAI_API_KEY:}
-      model: gpt-4  # 可更改为其他模型
-    qianwen:
-      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
-      api-key: ${QIANWEN_API_KEY:}
-      model: qwen-plus  # 可更改为其他千问模型
-    deepseek:
-      base-url: https://api.deepseek.com
-      api-key: ${DEEPSEEK_API_KEY:}
-      model: deepseek-coder  # 可更改为其他DeepSeek模型
-
-# 默认使用的模型
-ai.default-model: qianwen
-```
-
 ## 扩展新模型
 
 要添加新的 AI 模型支持：
 
 1. 在 `application.yaml` 中添加配置：
    ```yaml
-   spring.ai.newmodel:
-     base-url: https://api.newmodel.com
-     api-key: ${NEWMODEL_API_KEY:}
-     model: model-name
+   spring:
+     ai:
+       newmodel:
+         enabled: true
+         base-url: https://api.newmodel.com
+         api-key: ${NEWMODEL_API_KEY:}
+         model: model-name
    ```
 
-2. 在 `MultiModelAiConfig.java` 中添加 Bean：
+2. 在 `MultiModelAiConfig.java` 中添加新的 Bean：
    ```java
    @Bean
    @Qualifier("newmodelChatClient")
-   public ChatClient newmodelChatClient(...) {
-       // 配置新的ChatClient
+   @ConditionalOnProperty(prefix = "spring.ai.newmodel", name = "enabled", havingValue = "true")
+   public ChatClient newmodelChatClient() {
+       OpenAiApi api = new OpenAiApi(
+           System.getenv("NEWMODEL_BASE_URL"),
+           System.getenv("NEWMODEL_API_KEY")
+       );
+       return new OpenAiChatClient(api,
+           OpenAiChatOptions.builder().withModel("model-name").build());
    }
    ```
 
-3. 在模型映射表中注册：
-   ```java
-   map.put("newmodel", newmodelChatClient);
-   ```
+3. 在 `ChatController` 和 `DemoRunner` 中注册新的模型映射。
 
-## 测试
+## 错误处理
 
-```bash
-# 运行所有测试
-./gradlew test
+### 常见问题
 
-# 运行特定测试
-./gradlew test --tests "*ChatControllerTest*"
-```
+1. **API 密钥错误**
+   - 确保环境变量已正确设置
+   - 检查 API 密钥是否有效
 
-## 故障排除
+2. **网络连接问题**
+   - 检查网络连接
+   - 确认可以访问对应的 API 端点
 
-### 1. API 密钥错误
+3. **模型不支持错误**
+   - 检查配置的模型名称是否正确
+   - 确认该模型在服务商的账户中可用
 
-确保正确设置环境变量或直接在配置文件中配置。
+## 环境要求
 
-### 2. 网络连接问题
-
-检查网络连接，确保可以访问对应的 API 端点。
-
-### 3. 模型不支持错误
-
-检查请求中的模型名称是否正确，支持：`openai`、`qianwen`、`deepseek`。
-
-### 4. 编译错误
-
-确保使用正确的 Java 版本（21+）和 Gradle 版本（9.3+）。
-
-## 技术栈
-
-- **Spring Boot 3.2.5** - 应用框架
-- **Spring AI 0.8.1** - AI 集成框架
-- **Spring Web** - REST API 支持
-- **OpenAI Java SDK** - OpenAI API 客户端
-- **Gradle** - 构建工具
+- Java 21 或更高版本
+- Gradle 9.3+
 
 ## 许可证
 
-MIT License
+Mozilla Public License 2.0
