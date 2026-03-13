@@ -187,7 +187,7 @@ public class MultiModelAiConfig {
      * @param modelName 模型名称
      * @return 对应的模型配置属性对象
      */
-    private AiProperties.ModelProperties getModelProperties(String modelName) {
+    AiProperties.ModelProperties getModelProperties(String modelName) {
         if (modelName == null || modelName.trim().isEmpty()) {
             return aiProperties.getDeepseek();
         }

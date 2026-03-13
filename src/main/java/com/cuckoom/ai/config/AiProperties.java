@@ -90,6 +90,6 @@ public class AiProperties {
          * Qwen3 Coder Next 默认：qwen3-coder-next
          * </p>
          */
-        private String model;
+        private String model = "default-model";
     }
 }

@@ -157,7 +157,7 @@ public class ChatController {
      * @param request 聊天请求对象
      * @throws IllegalArgumentException 当消息内容为空时抛出
      */
-    private void validateRequest(ChatApiRequest request) {
+    void validateRequest(ChatApiRequest request) {
         if (request == null || request.getMessage() == null || request.getMessage().trim().isEmpty()) {
             String errorMsg = localeContextService.getMessage("error.chat-api.request-message-required");
             throw new IllegalArgumentException(errorMsg);
@@ -173,7 +173,7 @@ public class ChatController {
      * @param modelName 模型名称
      * @return 对应的 ChatClient 实例，如果不存在则返回默认客户端
      */
-    private ChatClient getChatClient(String modelName) {
+    ChatClient getChatClient(String modelName) {
         if (modelName == null || modelName.trim().isEmpty()) {
             return defaultChatClient;
         }
