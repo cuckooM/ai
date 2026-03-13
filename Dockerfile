@@ -1,5 +1,5 @@
 # Build stage with Mandrel
-FROM quay.io/mandrel/mandrel:24.1-jdk21 AS build
+FROM ghcr.io/graalvm/mandrel:24.1.1.0-Final-java21 AS build
 WORKDIR /build
 
 # Copy all project files
@@ -9,10 +9,6 @@ COPY src src/
 
 # Make gradlew executable
 RUN chmod +x gradlew
-
-# Set environment variables for Mandrel
-ENV GRAALVM_HOME=/opt/mandrel
-ENV PATH="${GRAALVM_HOME}/bin:${PATH}"
 
 # Build the application using gradle wrapper with native-image tool
 RUN ./gradlew clean nativeCompile --no-daemon
